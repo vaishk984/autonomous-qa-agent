@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://via.placeholder.com/1200x260.png?text=Autonomous+QA+Agent+%7C+AI+Powered+Test+Case+%26+Selenium+Script+Generation" alt="Autonomous QA Agent Banner"/>
-</p>
-
 <h1 align="center">Autonomous QA Agent</h1>
 <h3 align="center">AI-based Test Case Generator & Automated Selenium Script Builder</h3>
 

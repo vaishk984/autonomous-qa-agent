@@ -1,0 +1,270 @@
+{
+  "api_version": "1.0",
+  "base_url": "/api/v1",
+  "endpoints": {
+    "cart": {
+      "POST /cart/add": {
+        "description": "Add an item to the shopping cart",
+        "request_body": {
+          "product_id": "integer (required)",
+          "quantity": "integer (default: 1)"
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Item added to cart",
+              "cart_total": "number",
+              "item_count": "integer"
+            }
+          },
+          "error": {
+            "status": 400,
+            "body": {
+              "error": "Invalid product ID"
+            }
+          }
+        }
+      },
+      "PUT /cart/update": {
+        "description": "Update quantity of an item in cart",
+        "request_body": {
+          "product_id": "integer (required)",
+          "quantity": "integer (required, min: 0)"
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Cart updated",
+              "cart_total": "number"
+            }
+          }
+        },
+        "notes": "Setting quantity to 0 removes the item from cart"
+      },
+      "DELETE /cart/remove": {
+        "description": "Remove an item from cart",
+        "request_body": {
+          "product_id": "integer (required)"
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Item removed from cart"
+            }
+          }
+        }
+      },
+      "GET /cart": {
+        "description": "Get current cart contents",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "items": [
+                {
+                  "product_id": "integer",
+                  "name": "string",
+                  "price": "number",
+                  "quantity": "integer"
+                }
+              ],
+              "subtotal": "number",
+              "item_count": "integer"
+            }
+          }
+        }
+      }
+    },
+    "discount": {
+      "POST /apply_coupon": {
+        "description": "Apply a discount code to the current order",
+        "request_body": {
+          "code": "string (required)"
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Discount code applied",
+              "discount_percent": "integer",
+              "discount_amount": "number",
+              "new_total": "number"
+            }
+          },
+          "error_invalid": {
+            "status": 400,
+            "body": {
+              "error": "Invalid discount code"
+            }
+          },
+          "error_already_applied": {
+            "status": 400,
+            "body": {
+              "error": "A discount code has already been applied"
+            }
+          },
+          "error_empty_cart": {
+            "status": 400,
+            "body": {
+              "error": "Please add items to cart first"
+            }
+          }
+        },
+        "valid_codes": ["SAVE15", "SAVE10", "WELCOME20"]
+      },
+      "DELETE /remove_coupon": {
+        "description": "Remove applied discount code",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Discount code removed"
+            }
+          }
+        }
+      }
+    },
+    "order": {
+      "POST /submit_order": {
+        "description": "Submit the order for processing",
+        "request_body": {
+          "customer": {
+            "name": "string (required)",
+            "email": "string (required, valid email format)",
+            "phone": "string (optional)",
+            "address": "string (required)"
+          },
+          "shipping_method": "string (required, enum: ['standard', 'express'])",
+          "payment_method": "string (required, enum: ['credit_card', 'paypal'])"
+        },
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "message": "Payment Successful!",
+              "order_number": "string (format: ORD-[timestamp])",
+              "total_charged": "number"
+            }
+          },
+          "error_validation": {
+            "status": 400,
+            "body": {
+              "error": "Validation failed",
+              "fields": {
+                "name": "Please enter your full name",
+                "email": "Please enter a valid email address",
+                "address": "Please enter your shipping address"
+              }
+            }
+          },
+          "error_empty_cart": {
+            "status": 400,
+            "body": {
+              "error": "Your cart is empty. Please add items before checkout."
+            }
+          }
+        }
+      },
+      "GET /order/{order_id}": {
+        "description": "Get order details by order ID",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "order_id": "string",
+              "status": "string",
+              "items": "array",
+              "total": "number",
+              "created_at": "datetime"
+            }
+          },
+          "error": {
+            "status": 404,
+            "body": {
+              "error": "Order not found"
+            }
+          }
+        }
+      }
+    },
+    "products": {
+      "GET /products": {
+        "description": "Get all available products",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "products": [
+                {
+                  "id": 1,
+                  "name": "Wireless Headphones",
+                  "price": 79.99
+                },
+                {
+                  "id": 2,
+                  "name": "Smart Watch",
+                  "price": 149.99
+                },
+                {
+                  "id": 3,
+                  "name": "Portable Charger",
+                  "price": 29.99
+                }
+              ]
+            }
+          }
+        }
+      },
+      "GET /products/{product_id}": {
+        "description": "Get a specific product by ID",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "id": "integer",
+              "name": "string",
+              "price": "number",
+              "description": "string",
+              "stock_status": "string"
+            }
+          },
+          "error": {
+            "status": 404,
+            "body": {
+              "error": "Product not found"
+            }
+          }
+        }
+      }
+    },
+    "shipping": {
+      "GET /shipping/methods": {
+        "description": "Get available shipping methods",
+        "response": {
+          "success": {
+            "status": 200,
+            "body": {
+              "methods": [
+                {
+                  "id": "standard",
+                  "name": "Standard Shipping",
+                  "cost": 0,
+                  "delivery_time": "5-7 business days"
+                },
+                {
+                  "id": "express",
+                  "name": "Express Shipping",
+                  "cost": 10.00,
+                  "delivery_time": "2-3 business days"
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Shop Checkout</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .section { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; margin-bottom: 20px; color: #333; grid-column: 1 / -1; }
+        h2 { margin-bottom: 15px; color: #444; border-bottom: 2px solid #4CAF50; padding-bottom: 5px; }
+        .product { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
+        .product-info { flex: 1; }
+        .product-name { font-weight: bold; }
+        .product-price { color: #4CAF50; }
+        .btn-add-cart { background: #4CAF50; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .btn-add-cart:hover { background: #45a049; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #eee; }
+        .quantity-input { width: 50px; padding: 5px; text-align: center; border: 1px solid #ddd; border-radius: 4px; }
+        .btn-remove { background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .discount-section { margin: 15px 0; display: flex; gap: 10px; }
+        #discount-code { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        #apply-discount { background: #2196F3; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; }
+        .discount-message { margin-top: 10px; padding: 8px; border-radius: 4px; }
+        .discount-success { background: #e8f5e9; color: #2e7d32; }
+        .discount-error { background: #ffebee; color: #c62828; }
+        .totals { margin-top: 15px; padding-top: 15px; border-top: 2px solid #eee; }
+        .total-row { display: flex; justify-content: space-between; margin: 5px 0; }
+        .grand-total { font-size: 1.2em; font-weight: bold; color: #4CAF50; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 500; }
+        input[type="text"], input[type="email"], textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        input:focus, textarea:focus { outline: none; border-color: #4CAF50; }
+        .error-message { color: #f44336; font-size: 0.85em; margin-top: 5px; display: none; }
+        .input-error { border-color: #f44336 !important; }
+        .radio-group { margin: 10px 0; }
+        .radio-option { display: flex; align-items: center; margin: 8px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
+        .radio-option:hover { background: #f9f9f9; }
+        .radio-option input { margin-right: 10px; }
+        .radio-option .option-details { flex: 1; }
+        .option-price { color: #666; font-size: 0.9em; }
+        #pay-now { width: 100%; padding: 15px; background: #4CAF50; color: white; border: none; border-radius: 4px; font-size: 1.1em; cursor: pointer; margin-top: 20px; }
+        #pay-now:hover { background: #45a049; }
+        #pay-now:disabled { background: #ccc; cursor: not-allowed; }
+        .payment-success { display: none; text-align: center; padding: 40px; background: #e8f5e9; border-radius: 8px; margin-top: 20px; grid-column: 1 / -1; }
+        .payment-success h2 { color: #2e7d32; border: none; }
+        .empty-cart { text-align: center; padding: 20px; color: #666; }
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>E-Shop Checkout</h1>
+        
+        <!-- Products Section -->
+        <div class="section" id="products-section">
+            <h2>Products</h2>
+            <div class="product" data-product-id="1" data-product-name="Wireless Headphones" data-product-price="79.99">
+                <div class="product-info">
+                    <div class="product-name">Wireless Headphones</div>
+                    <div class="product-price">$79.99</div>
+                </div>
+                <button class="btn-add-cart" id="add-product-1" onclick="addToCart(1, 'Wireless Headphones', 79.99)">Add to Cart</button>
+            </div>
+            <div class="product" data-product-id="2" data-product-name="Smart Watch" data-product-price="149.99">
+                <div class="product-info">
+                    <div class="product-name">Smart Watch</div>
+                    <div class="product-price">$149.99</div>
+                </div>
+                <button class="btn-add-cart" id="add-product-2" onclick="addToCart(2, 'Smart Watch', 149.99)">Add to Cart</button>
+            </div>
+            <div class="product" data-product-id="3" data-product-name="Portable Charger" data-product-price="29.99">
+                <div class="product-info">
+                    <div class="product-name">Portable Charger</div>
+                    <div class="product-price">$29.99</div>
+                </div>
+                <button class="btn-add-cart" id="add-product-3" onclick="addToCart(3, 'Portable Charger', 29.99)">Add to Cart</button>
+            </div>
+        </div>
+
+        <!-- Cart Section -->
+        <div class="section" id="cart-section">
+            <h2>Shopping Cart</h2>
+            <div id="cart-items">
+                <div class="empty-cart" id="empty-cart-message">Your cart is empty</div>
+            </div>
+            <div class="discount-section">
+                <input type="text" id="discount-code" name="discount_code" placeholder="Enter discount code">
+                <button id="apply-discount" onclick="applyDiscount()">Apply</button>
+            </div>
+            <div id="discount-message" class="discount-message" style="display: none;"></div>
+            <div class="totals">
+                <div class="total-row"><span>Subtotal:</span><span id="subtotal">$0.00</span></div>
+                <div class="total-row"><span>Discount:</span><span id="discount-amount">-$0.00</span></div>
+                <div class="total-row"><span>Shipping:</span><span id="shipping-cost">$0.00</span></div>
+                <div class="total-row grand-total"><span>Total:</span><span id="grand-total">$0.00</span></div>
+            </div>
+        </div>
+
+        <!-- User Details Form -->
+        <div class="section" id="user-details-section">
+            <h2>User Details</h2>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label for="customer-name">Full Name *</label>
+                    <input type="text" id="customer-name" name="customer_name" placeholder="John Doe">
+                    <div class="error-message" id="name-error">Please enter your full name</div>
+                </div>
+                <div class="form-group">
+                    <label for="customer-email">Email Address *</label>
+                    <input type="email" id="customer-email" name="customer_email" placeholder="john@example.com">
+                    <div class="error-message" id="email-error">Please enter a valid email address</div>
+                </div>
+                <div class="form-group">
+                    <label for="customer-phone">Phone Number</label>
+                    <input type="text" id="customer-phone" name="customer_phone" placeholder="+1 (555) 123-4567">
+                    <div class="error-message" id="phone-error">Please enter a valid phone number</div>
+                </div>
+                <div class="form-group">
+                    <label for="customer-address">Shipping Address *</label>
+                    <textarea id="customer-address" name="customer_address" rows="3" placeholder="123 Main St, City, State 12345"></textarea>
+                    <div class="error-message" id="address-error">Please enter your shipping address</div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Shipping & Payment Section -->
+        <div class="section" id="shipping-payment-section">
+            <h2>Shipping Method</h2>
+            <div class="radio-group" id="shipping-methods">
+                <label class="radio-option">
+                    <input type="radio" name="shipping_method" value="standard" id="shipping-standard" checked>
+                    <div class="option-details">
+                        <div>Standard Shipping</div>
+                        <div class="option-price">Free - 5-7 business days</div>
+                    </div>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="shipping_method" value="express" id="shipping-express">
+                    <div class="option-details">
+                        <div>Express Shipping</div>
+                        <div class="option-price">$10.00 - 2-3 business days</div>
+                    </div>
+                </label>
+            </div>
+
+            <h2 style="margin-top: 20px;">Payment Method</h2>
+            <div class="radio-group" id="payment-methods">
+                <label class="radio-option">
+                    <input type="radio" name="payment_method" value="credit_card" id="payment-credit-card" checked>
+                    <div class="option-details">
+                        <div>Credit Card</div>
+                        <div class="option-price">Visa, MasterCard, Amex</div>
+                    </div>
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="payment_method" value="paypal" id="payment-paypal">
+                    <div class="option-details">
+                        <div>PayPal</div>
+                        <div class="option-price">Pay with your PayPal account</div>
+                    </div>
+                </label>
+            </div>
+
+            <button id="pay-now" onclick="processPayment()">Pay Now</button>
+        </div>
+
+        <!-- Success Message -->
+        <div class="payment-success" id="payment-success">
+            <h2>✓ Payment Successful!</h2>
+            <p>Thank you for your order. A confirmation email has been sent.</p>
+            <p id="order-number"></p>
+        </div>
+    </div>
+
+    <script>
+        let cart = [];
+        let discountPercent = 0;
+        let discountApplied = false;
+        const validDiscountCodes = { 'SAVE15': 15, 'SAVE10': 10, 'WELCOME20': 20 };
+
+        function addToCart(id, name, price) {
+            const existingItem = cart.find(item => item.id === id);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id, name, price, quantity: 1 });
+            }
+            renderCart();
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function updateQuantity(id, quantity) {
+            const item = cart.find(item => item.id === id);
+            if (item) {
+                const newQty = parseInt(quantity);
+                if (newQty <= 0) {
+                    removeFromCart(id);
+                } else {
+                    item.quantity = newQty;
+                }
+            }
+            renderCart();
+        }
+
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyMessage = document.getElementById('empty-cart-message');
+            
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = '<div class="empty-cart" id="empty-cart-message">Your cart is empty</div>';
+                discountPercent = 0;
+                discountApplied = false;
+                document.getElementById('discount-message').style.display = 'none';
+            } else {
+                cartItemsContainer.innerHTML = cart.map(item => `
+                    <div class="cart-item" data-cart-item-id="${item.id}">
+                        <span class="cart-item-name">${item.name}</span>
+                        <input type="number" class="quantity-input" id="qty-${item.id}" 
+                               value="${item.quantity}" min="1" 
+                               onchange="updateQuantity(${item.id}, this.value)">
+                        <span class="cart-item-price">$${(item.price * item.quantity).toFixed(2)}</span>
+                        <button class="btn-remove" id="remove-${item.id}" onclick="removeFromCart(${item.id})">Remove</button>
+                    </div>
+                `).join('');
+            }
+            updateTotals();
+        }
+
+        function applyDiscount() {
+            const code = document.getElementById('discount-code').value.trim().toUpperCase();
+            const messageEl = document.getElementById('discount-message');
+            
+            if (cart.length === 0) {
+                messageEl.textContent = 'Please add items to cart first';
+                messageEl.className = 'discount-message discount-error';
+                messageEl.style.display = 'block';
+                return;
+            }
+
+            if (discountApplied) {
+                messageEl.textContent = 'A discount code has already been applied';
+                messageEl.className = 'discount-message discount-error';
+                messageEl.style.display = 'block';
+                return;
+            }
+
+            if (validDiscountCodes[code]) {
+                discountPercent = validDiscountCodes[code];
+                discountApplied = true;
+                messageEl.textContent = `Discount code "${code}" applied! ${discountPercent}% off`;
+                messageEl.className = 'discount-message discount-success';
+                messageEl.style.display = 'block';
+                updateTotals();
+            } else {
+                messageEl.textContent = 'Invalid discount code';
+                messageEl.className = 'discount-message discount-error';
+                messageEl.style.display = 'block';
+            }
+        }
+
+        function getShippingCost() {
+            const expressShipping = document.getElementById('shipping-express');
+            return expressShipping && expressShipping.checked ? 10.00 : 0.00;
+        }
+
+        function updateTotals() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const discountAmount = subtotal * (discountPercent / 100);
+            const shipping = getShippingCost();
+            const total = subtotal - discountAmount + shipping;
+
+            document.getElementById('subtotal').textContent = `$${subtotal.toFixed(2)}`;
+            document.getElementById('discount-amount').textContent = `-$${discountAmount.toFixed(2)}`;
+            document.getElementById('shipping-cost').textContent = `$${shipping.toFixed(2)}`;
+            document.getElementById('grand-total').textContent = `$${total.toFixed(2)}`;
+        }
+
+        document.querySelectorAll('input[name="shipping_method"]').forEach(radio => {
+            radio.addEventListener('change', updateTotals);
+        });
+
+        function validateForm() {
+            let isValid = true;
+            
+            // Validate Name
+            const name = document.getElementById('customer-name');
+            const nameError = document.getElementById('name-error');
+            if (!name.value.trim()) {
+                name.classList.add('input-error');
+                nameError.style.display = 'block';
+                isValid = false;
+            } else {
+                name.classList.remove('input-error');
+                nameError.style.display = 'none';
+            }
+
+            // Validate Email
+            const email = document.getElementById('customer-email');
+            const emailError = document.getElementById('email-error');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim() || !emailRegex.test(email.value)) {
+                email.classList.add('input-error');
+                emailError.style.display = 'block';
+                isValid = false;
+            } else {
+                email.classList.remove('input-error');
+                emailError.style.display = 'none';
+            }
+
+            // Validate Address
+            const address = document.getElementById('customer-address');
+            const addressError = document.getElementById('address-error');
+            if (!address.value.trim()) {
+                address.classList.add('input-error');
+                addressError.style.display = 'block';
+                isValid = false;
+            } else {
+                address.classList.remove('input-error');
+                addressError.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        function processPayment() {
+            if (cart.length === 0) {
+                alert('Your cart is empty. Please add items before checkout.');
+                return;
+            }
+
+            if (!validateForm()) {
+                return;
+            }
+
+            // Hide form sections and show success
+            document.getElementById('products-section').style.display = 'none';
+            document.getElementById('cart-section').style.display = 'none';
+            document.getElementById('user-details-section').style.display = 'none';
+            document.getElementById('shipping-payment-section').style.display = 'none';
+            
+            const successEl = document.getElementById('payment-success');
+            const orderNumber = 'ORD-' + Date.now();
+            document.getElementById('order-number').textContent = `Order Number: ${orderNumber}`;
+            successEl.style.display = 'block';
+        }
+
+        // Clear error on input
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('input-error');
+                const errorEl = this.nextElementSibling;
+                if (errorEl && errorEl.classList.contains('error-message')) {
+                    errorEl.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

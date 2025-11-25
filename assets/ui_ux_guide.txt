@@ -1,0 +1,180 @@
+E-SHOP UI/UX DESIGN GUIDELINES
+================================
+
+1. COLOR SCHEME
+---------------
+Primary Color (Actions/Success): #4CAF50 (Green)
+Secondary Color (Info/Links): #2196F3 (Blue)
+Error/Danger Color: #f44336 (Red)
+Background: #f5f5f5 (Light Gray)
+Card Background: #FFFFFF (White)
+Text Primary: #333333 (Dark Gray)
+Text Secondary: #666666 (Medium Gray)
+
+2. BUTTON STYLING
+-----------------
+"Add to Cart" Buttons:
+- Background: Green (#4CAF50)
+- Text: White
+- Hover: Darker green (#45a049)
+- ID format: add-product-[ID]
+
+"Pay Now" Button:
+- Background: Green (#4CAF50)
+- Text: White
+- Full width of container
+- Font size: 1.1em
+- Disabled state: Gray background (#ccc), not-allowed cursor
+- ID: pay-now
+
+"Apply" Button (Discount):
+- Background: Blue (#2196F3)
+- Text: White
+- ID: apply-discount
+
+"Remove" Button (Cart):
+- Background: Red (#f44336)
+- Text: White
+- ID format: remove-[ID]
+
+3. FORM VALIDATION
+------------------
+Error Display Rules:
+- Error messages MUST be displayed in RED text (#f44336)
+- Error messages appear BELOW the input field
+- Error messages are hidden by default (display: none)
+- Error messages become visible when validation fails
+
+Input Error State:
+- Border color changes to RED (#f44336)
+- Class "input-error" is added to the input element
+
+Required Fields (marked with *):
+- Full Name (customer-name)
+- Email Address (customer-email)
+- Shipping Address (customer-address)
+
+Optional Fields:
+- Phone Number (customer-phone)
+
+Validation Rules:
+- Name: Must not be empty
+- Email: Must match email format (contains @ and domain)
+- Address: Must not be empty
+- Validation occurs on "Pay Now" button click
+
+Error Clearing:
+- Error state clears when user starts typing in the field
+- Both error message and red border are removed on input
+
+4. CART DISPLAY
+---------------
+Empty Cart:
+- Display message: "Your cart is empty"
+- Center-aligned, gray text
+- ID: empty-cart-message
+
+Cart Items:
+- Display in list format with item name, quantity input, price, remove button
+- Each item in a flex container
+- Quantity input: width 50px, centered text
+
+Totals Section:
+- Subtotal, Discount, Shipping, Grand Total
+- Grand Total emphasized (larger font, bold, green color)
+- ID format: subtotal, discount-amount, shipping-cost, grand-total
+
+5. DISCOUNT CODE FEEDBACK
+-------------------------
+Success Message:
+- Background: Light green (#e8f5e9)
+- Text: Dark green (#2e7d32)
+- Message format: "Discount code [CODE] applied! X% off"
+- Class: discount-success
+
+Error Message:
+- Background: Light red (#ffebee)
+- Text: Dark red (#c62828)
+- Possible messages:
+  * "Invalid discount code"
+  * "Please add items to cart first"
+  * "A discount code has already been applied"
+- Class: discount-error
+
+Message Container:
+- ID: discount-message
+- Hidden by default
+- Appears below discount input after apply attempt
+
+6. RADIO BUTTON GROUPS
+----------------------
+Shipping Methods:
+- Standard Shipping (ID: shipping-standard) - Default selected
+- Express Shipping (ID: shipping-express)
+- Container ID: shipping-methods
+
+Payment Methods:
+- Credit Card (ID: payment-credit-card) - Default selected
+- PayPal (ID: payment-paypal)
+- Container ID: payment-methods
+
+Radio Option Styling:
+- Full clickable area with border
+- Hover effect: light gray background
+- Contains label and price/description
+
+7. SUCCESS STATE
+----------------
+Payment Success Display:
+- Full width spanning both columns
+- Background: Light green (#e8f5e9)
+- Contains checkmark, "Payment Successful!" heading
+- Shows order number in format: ORD-[timestamp]
+- Confirmation message about email
+- ID: payment-success
+- Hidden by default, shown after successful payment
+
+Form Sections Hidden on Success:
+- products-section
+- cart-section
+- user-details-section
+- shipping-payment-section
+
+8. RESPONSIVE DESIGN
+--------------------
+Desktop (>768px):
+- Two-column grid layout
+- Products and Cart side by side
+- User Details and Shipping/Payment side by side
+
+Mobile (≤768px):
+- Single column layout
+- All sections stack vertically
+
+9. ACCESSIBILITY
+----------------
+- All form inputs have associated labels
+- Placeholder text provides examples
+- Error messages are descriptive
+- Sufficient color contrast for text
+- Interactive elements are keyboard accessible
+
+10. ELEMENT IDS AND SELECTORS
+-----------------------------
+Key IDs for Testing:
+- #products-section
+- #cart-section
+- #cart-items
+- #discount-code
+- #apply-discount
+- #discount-message
+- #customer-name
+- #customer-email
+- #customer-phone
+- #customer-address
+- #name-error, #email-error, #phone-error, #address-error
+- #shipping-standard, #shipping-express
+- #payment-credit-card, #payment-paypal
+- #pay-now
+- #payment-success
+- #subtotal, #discount-amount, #shipping-cost, #grand-total

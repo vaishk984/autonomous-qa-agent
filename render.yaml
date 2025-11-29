@@ -16,10 +16,6 @@ services:
         value: llama-3.3-70b-versatile
       - key: GROQ_API_KEY
         sync: false  # This will be set manually in Render dashboard
-    disk:
-      name: qa-agent-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1
 
   # Streamlit Frontend Service
   - type: web

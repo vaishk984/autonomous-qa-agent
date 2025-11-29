@@ -18,6 +18,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.on_event("startup")
+async def startup_event():
+    """Startup event - log that server is starting."""
+    print("=" * 60)
+    print("QA Agent API Starting...")
+    print(f"Port: {os.getenv('PORT', 8000)}")
+    print("=" * 60)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -27,9 +35,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize components
-doc_processor = DocumentProcessor()
-text_chunker = TextChunker(config.CHUNK_SIZE, config.CHUNK_OVERLAP)
+# Import heavy modules lazily to speed up startup
+doc_processor = None
+text_chunker = None
+vector_store = None
+
+def get_doc_processor():
+    global doc_processor
+    if doc_processor is None:
+        from document_processor import DocumentProcessor
+        doc_processor = DocumentProcessor()
+    return doc_processor
+
+def get_text_chunker():
+    global text_chunker
+    if text_chunker is None:
+        from document_processor import TextChunker
+        text_chunker = TextChunker(config.CHUNK_SIZE, config.CHUNK_OVERLAP)
+    return text_chunker
+
+def get_vector_store():
+    global vector_store
+    if vector_store is None:
+        from vector_store import vector_store as vs
+        vector_store = vs
+    return vector_store
 
 # Store HTML content in memory for script generation
 html_content_store: Dict[str, str] = {}
@@ -60,7 +90,8 @@ async def root():
 @app.get("/api/stats")
 async def get_stats():
     """Get knowledge base statistics."""
-    stats = vector_store.get_stats()
+    vs = get_vector_store()
+    stats = vs.get_stats()
     return {
         "knowledge_base": stats,
         "html_files": list(html_content_store.keys())
@@ -70,6 +101,10 @@ async def get_stats():
 @app.post("/api/upload/documents")
 async def upload_documents(files: List[UploadFile] = File(...)):
     """Upload and process support documents."""
+    processor = get_doc_processor()
+    chunker = get_text_chunker()
+    vs = get_vector_store()
+    
     results = []
     
     for file in files:
@@ -87,10 +122,10 @@ async def upload_documents(files: List[UploadFile] = File(...)):
                 continue
             
             # Process document
-            doc_data = doc_processor.process(file_path, content)
+            doc_data = processor.process(file_path, content)
             
             # Chunk the content
-            chunks = text_chunker.split(
+            chunks = chunker.split(
                 doc_data["content"],
                 metadata={
                     "source_document": doc_data["source_document"],
@@ -99,7 +134,7 @@ async def upload_documents(files: List[UploadFile] = File(...)):
             )
             
             # Add to vector store
-            num_chunks = vector_store.add_documents(chunks)
+            num_chunks = vs.add_documents(chunks)
             
             results.append({
                 "filename": file.filename,
@@ -121,6 +156,10 @@ async def upload_documents(files: List[UploadFile] = File(...)):
 async def upload_html(file: UploadFile = File(...)):
     """Upload the target HTML file."""
     try:
+        processor = get_doc_processor()
+        chunker = get_text_chunker()
+        vs = get_vector_store()
+        
         content = await file.read()
         file_path = Path(file.filename)
         
@@ -128,15 +167,15 @@ async def upload_html(file: UploadFile = File(...)):
         html_content_store[file.filename] = content.decode("utf-8", errors="ignore")
         
         # Also process and add to vector store for context
-        doc_data = doc_processor.process(file_path, content)
-        chunks = text_chunker.split(
+        doc_data = processor.process(file_path, content)
+        chunks = chunker.split(
             doc_data["content"],
             metadata={
                 "source_document": doc_data["source_document"],
                 "filename": doc_data["filename"]
             }
         )
-        num_chunks = vector_store.add_documents(chunks)
+        num_chunks = vs.add_documents(chunks)
         
         return {
             "filename": file.filename,
@@ -152,7 +191,8 @@ async def upload_html(file: UploadFile = File(...)):
 @app.post("/api/build-knowledge-base")
 async def build_knowledge_base():
     """Confirm knowledge base is built (documents already processed on upload)."""
-    stats = vector_store.get_stats()
+    vs = get_vector_store()
+    stats = vs.get_stats()
     return {
         "status": "success",
         "message": "Knowledge base is ready",
@@ -164,16 +204,29 @@ async def build_knowledge_base():
 async def generate_test_cases(request: TestCaseRequest):
     """Generate test cases based on user query."""
     try:
-        agent = QAAgent(vector_store)
+        vs = get_vector_store()
+        
+        # Check if knowledge base has documents
+        stats = vs.get_stats()
+        if stats.get("total_chunks", 0) == 0:
+            raise HTTPException(
+                status_code=400, 
+                detail="Knowledge base is empty. Please upload documents first."
+            )
+        
+        from llm_client import QAAgent
+        agent = QAAgent(vs)
         
         # Generate test cases
+        print(f"Generating test cases for query: {request.query}")
         raw_response = agent.generate_test_cases(request.query, request.n_context)
+        print(f"LLM Response received, length: {len(raw_response)}")
         
         # Parse test cases
         test_cases = agent.parse_test_cases(raw_response)
         
         # Get sources used
-        context_results = vector_store.search(request.query, n_results=request.n_context)
+        context_results = vs.search(request.query, n_results=request.n_context)
         sources = list(set([
             r["metadata"].get("source_document", "unknown") 
             for r in context_results
@@ -185,7 +238,12 @@ async def generate_test_cases(request: TestCaseRequest):
             sources_used=sources
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        error_detail = f"{str(e)}\n{traceback.format_exc()}"
+        print(f"Error generating test cases: {error_detail}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -193,11 +251,13 @@ async def generate_test_cases(request: TestCaseRequest):
 async def generate_selenium_script(request: ScriptGenerationRequest):
     """Generate Selenium script for a test case."""
     try:
+        vs = get_vector_store()
+        
         # Get HTML content
         html_content = html_content_store.get(request.html_filename)
         if not html_content:
             # Try to get from vector store
-            html_docs = vector_store.get_document_by_source(request.html_filename)
+            html_docs = vs.get_document_by_source(request.html_filename)
             if html_docs:
                 html_content = "\n".join([d["content"] for d in html_docs])
             else:
@@ -206,7 +266,8 @@ async def generate_selenium_script(request: ScriptGenerationRequest):
                     detail=f"HTML file '{request.html_filename}' not found"
                 )
         
-        agent = QAAgent(vector_store)
+        from llm_client import QAAgent
+        agent = QAAgent(vs)
         script = agent.generate_selenium_script(request.test_case, html_content)
         
         return {
@@ -225,7 +286,8 @@ async def generate_selenium_script(request: ScriptGenerationRequest):
 async def clear_knowledge_base():
     """Clear all data from the knowledge base."""
     try:
-        vector_store.clear()
+        vs = get_vector_store()
+        vs.clear()
         html_content_store.clear()
         return {"status": "success", "message": "Knowledge base cleared"}
     except Exception as e:
@@ -235,21 +297,24 @@ async def clear_knowledge_base():
 @app.get("/api/sources")
 async def list_sources():
     """List all source documents in the knowledge base."""
-    stats = vector_store.get_stats()
+    vs = get_vector_store()
+    stats = vs.get_stats()
     return {"sources": stats.get("sources", [])}
 
 
 @app.get("/api/search")
 async def search_documents(query: str, n_results: int = 5):
     """Search the knowledge base."""
-    results = vector_store.search(query, n_results)
+    vs = get_vector_store()
+    results = vs.search(query, n_results)
     return {"query": query, "results": results}
 
 
 if __name__ == "__main__":
+    port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
-        host=config.API_HOST,
-        port=config.API_PORT,
+        host="0.0.0.0",
+        port=port,
         reload=True
     )

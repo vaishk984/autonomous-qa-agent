@@ -11,6 +11,7 @@ import config
 from document_processor import DocumentProcessor, TextChunker
 from vector_store import vector_store
 from llm_client import QAAgent
+import os
 
 app = FastAPI(
     title="QA Agent API",
@@ -247,10 +248,9 @@ async def search_documents(query: str, n_results: int = 5):
 
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=int(8000),
-        reload=True
+        port=int(os.environ.get("PORT", 8000)),
+        reload=False
     )

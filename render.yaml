@@ -5,7 +5,7 @@ services:
     env: python
     region: oregon
     plan: free
-    rootDir: backend  # Add this if your files are in a backend folder
+    rootDir: backend  
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
@@ -16,7 +16,7 @@ services:
       - key: GROQ_MODEL
         value: llama-3.3-70b-versatile
       - key: GROQ_API_KEY
-        sync: false  # This will be set manually in Render dashboard
+        sync: false  
 
   # Streamlit Frontend Service
   - type: web
@@ -24,9 +24,9 @@ services:
     env: python
     region: oregon
     plan: free
-    rootDir: backend  # Add this if your files are in a backend folder (same location as main.py)
+    rootDir: streamlit-app  
     buildCommand: pip install -r requirements.txt
-    startCommand: streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
+    startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0

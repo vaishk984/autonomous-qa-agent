@@ -33,7 +33,7 @@ This significantly reduces QA manual effort while improving accuracy and coverag
 
 ## Architecture
 
-```mermaid
+```bash
 flowchart LR
     A[Support Documents\n(MD, TXT, JSON, PDF)] -->|Extract & Chunk| B(Document Processor)
     A2[Target HTML\ncheckout.html] -->|Parse & Extract Selectors| B

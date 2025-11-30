@@ -5,7 +5,7 @@ services:
     env: python
     region: oregon
     plan: free
-    rootDir: backend  # Backend files are in backend/ folder
+    rootDir: backend
     buildCommand: pip install -r requirements.txt && python download_models.py
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 75
     envVars:
@@ -28,7 +28,7 @@ services:
     env: python
     region: oregon
     plan: free
-    rootDir: streamlit-app  # Frontend files are in streamlit-app/ folder
+    rootDir: streamlit-app  
     buildCommand: pip install -r requirements.txt || pip install -r ../backend/requirements.txt
     startCommand: streamlit run app.py --server.port=$PORT --server.address=0.0.0.0 --server.headless=true
     envVars:

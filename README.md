@@ -18,6 +18,9 @@ The **Autonomous QA Agent** is an AI-powered platform that automatically generat
 This significantly reduces QA manual effort while improving accuracy and coverage.
 
 ---
+## Deployment Links
+- First run the backend: https://qa-agent-backend-s7bb.onrender.com
+- Then Frontend part: https://qa-agent-frontend-s7bb.onrender.com/
 
 ## Key Features
 

@@ -35,4 +35,4 @@ services:
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: API_BASE_URL
-        value: https://qa-agent-backend.onrender.com
+        value: https://qa-agent-backend-s7bb.onrender.com

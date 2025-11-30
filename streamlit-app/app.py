@@ -40,12 +40,38 @@ if "generated_scripts" not in st.session_state:
 
 
 def check_api_health() -> bool:
-    """Check if the API is running."""
-    try:
-        response = requests.get(f"{API_BASE_URL}/", timeout=5)
-        return response.status_code == 200
-    except:
-        return False
+    """Check if the API is running, with retry for cold starts."""
+    max_retries = 3
+    retry_delay = 5  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            if attempt > 0:
+                print(f"Retry attempt {attempt + 1}/{max_retries} after {retry_delay}s...")
+                import time
+                time.sleep(retry_delay)
+            
+            print(f"Attempting to connect to API at: {API_BASE_URL}")
+            response = requests.get(f"{API_BASE_URL}/", timeout=30)  # Increased timeout
+            print(f"API Response Status: {response.status_code}")
+            
+            if response.status_code == 200:
+                return True
+                
+        except requests.exceptions.Timeout:
+            print(f"API connection timeout to {API_BASE_URL} (attempt {attempt + 1})")
+            if attempt < max_retries - 1:
+                continue
+        except requests.exceptions.ConnectionError as e:
+            print(f"API connection error to {API_BASE_URL}: {str(e)} (attempt {attempt + 1})")
+            if attempt < max_retries - 1:
+                continue
+        except Exception as e:
+            print(f"API health check failed: {str(e)} (attempt {attempt + 1})")
+            if attempt < max_retries - 1:
+                continue
+    
+    return False
 
 
 def upload_documents(files) -> List[Dict]:

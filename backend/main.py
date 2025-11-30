@@ -19,6 +19,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.lifespan("startup")
+async def startup_event():
+    """Startup event - log that server is starting."""
+    print("=" * 60)
+    print("QA Agent API Starting...")
+    print(f"Port: {os.getenv('PORT', 8000)}")
+    print("=" * 60)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,

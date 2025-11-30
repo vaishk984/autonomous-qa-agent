@@ -48,22 +48,20 @@ flowchart LR
     I --> J["Python Selenium Script"]
 ```
 ## Tech Stack
-Layer	Technology
-Backend API:	FastAPI
-Frontend UI:	Streamlit
-Semantic Search:	ChromaDB
-LLM:	Groq LLaMA / Ollama
-Document Processing	Unstructured, BeautifulSoup4, PyMuPDF
-Automation Engine	Selenium WebDriver
-Model Serialization	Pydantic
-Async IO	Aiofiles, Httpx
-```
+- Layer	Technology
+- Backend API:	FastAPI
+- Frontend UI:	Streamlit
+- Semantic Search:	ChromaDB
+- LLM:	Groq LLaMA / Ollama
+- Document Processing	Unstructured, BeautifulSoup4, PyMuPDF
+- Automation Engine	Selenium WebDriver
+
 ---
 
 ## Installation & Setup
 
 #### Clone repository
-```
+``` bash
 git clone <repository-url>
 cd autonomous-qa-agent
 ```

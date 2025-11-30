@@ -33,25 +33,26 @@ This significantly reduces QA manual effort while improving accuracy and coverag
 
 ## Architecture
 
-```bash
+```mermaid
 flowchart LR
-    A[Support Documents\n(MD, TXT, JSON, PDF)] -->|Extract & Chunk| B(Document Processor)
-    A2[Target HTML\ncheckout.html] -->|Parse & Extract Selectors| B
-    B --> C[Embedding Generator\nSentence Transformers]
-    C --> D[ChromaDB\nVector Store]
-    
-    E[User Query\n(Test case request)] --> F[Semantic Search\nTop K chunks]
-    F -->|Context + Query| G[LLM\nGroq LLaMA / Ollama]
-    G --> H[Test Case JSON Response]
+    A["Support Documents (MD | TXT | JSON | PDF)"] -->|Extract & Chunk| B(Document Processor)
+    A2["Target HTML<br/>checkout.html"] -->|Parse & Extract Selectors| B
+    B --> C["Embedding Generator<br/>Sentence Transformers"]
+    C --> D["ChromaDB<br/>Vector Store"]
 
-    H --> I[Selenium Script Generator]
-    I --> J[Python Selenium Script]
-🛠 Tech Stack
+    E["User Query<br/>(Test case request)"] --> F["Semantic Search<br/>Top K chunks"]
+    F -->|Context + Query| G["LLM<br/>Groq LLaMA / Ollama"]
+    G --> H["Test Case JSON Response"]
+
+    H --> I["Selenium Script Generator"]
+    I --> J["Python Selenium Script"]
+```
+## Tech Stack
 Layer	Technology
-Backend API	FastAPI
-Frontend UI	Streamlit
-Semantic Search	ChromaDB
-LLM	Groq LLaMA / Ollama
+Backend API:	FastAPI
+Frontend UI:	Streamlit
+Semantic Search:	ChromaDB
+LLM:	Groq LLaMA / Ollama
 Document Processing	Unstructured, BeautifulSoup4, PyMuPDF
 Automation Engine	Selenium WebDriver
 Model Serialization	Pydantic
@@ -111,7 +112,13 @@ driver.find_element(By.ID, "apply-discount").click()
 assert "15%" in success_message.text
 ```
 ## Screenshots
-Upload Documents	Generated Test Cases
+<img width="1916" height="870" alt="Screenshot 2025-11-25 175849" src="https://github.com/user-attachments/assets/0958fdde-cbf5-411d-afcd-a9182175597d" />
+<img width="1919" height="813" alt="Screenshot 2025-11-25 175900" src="https://github.com/user-attachments/assets/e503462f-45a8-46dc-8c4c-31adcd66ea3d" />
+<img width="1919" height="834" alt="Screenshot 2025-11-25 175907" src="https://github.com/user-attachments/assets/00e09b5b-e501-42af-be01-85497cc9e8a2" />
+<img width="1910" height="825" alt="Screenshot 2025-11-25 175921" src="https://github.com/user-attachments/assets/565f52fe-7172-4f15-97e8-53283d33c0fe" />
+<img width="1919" height="888" alt="Screenshot 2025-11-25 175932" src="https://github.com/user-attachments/assets/aab19f2b-b422-4f4e-9cb0-36810ff0a4f3" />
+<img width="1919" height="896" alt="Screenshot 2025-11-25 175942" src="https://github.com/user-attachments/assets/151feded-8057-498f-a398-4051a635dbe9" />
+
 
 ## Project Structure
 ```
@@ -139,7 +146,7 @@ Fragile selectors	HTML-based selector extraction
 Hard to scale	Any number of docs and pages supported
 
 ## Demo Video
-(Add YouTube link after upload)
+https://drive.google.com/file/d/1WKcayHGSo-nSmSMuRwSsgmtvhkzRGFx_/view?usp=drive_link
 Includes full flow from documents → test cases → scripts
 
 ## Roadmap

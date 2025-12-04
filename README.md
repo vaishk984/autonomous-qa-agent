@@ -65,7 +65,7 @@ flowchart LR
 
 #### Clone repository
 ``` bash
-git clone <repository-url>
+git clone "https://github.com/vaishk984/autonomous-qa-agent.git"
 cd autonomous-qa-agent
 ```
 #### Install dependencies
